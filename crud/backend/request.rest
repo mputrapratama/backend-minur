@@ -1,0 +1,15 @@
+// create user
+POST http://localhost:5000/user
+Content-Type: application/json
+
+{
+    "name": "Renn",
+    "email": "admin@gamil.com",
+    "password" : "123456",
+    "confPassword" : "123456",
+    "role" : "admin"
+}
+
+###
+// get all user
+GET http://localhost:5000/user

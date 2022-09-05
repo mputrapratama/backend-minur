@@ -1,0 +1,5 @@
+{
+    "require": {
+        "innocenzi/laravel-vite": "0.2.*"
+    }
+}
