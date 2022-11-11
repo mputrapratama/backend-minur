@@ -1,48 +1,42 @@
-import User from "../models/UserModel.js";
-import argon2 from "argon2";
+import Auth from "../models/AuthModel.js";
+import bcrypt from "bcrypt";
+import { kirimEmail } from "../helpers/index.js";
+import dotenv from "dotenv";
 
-export const Login = async(req, res) => {
-    const user = await User.findOne({
-        where: {
-            email: req.body.email
-        }
-    });
+dotenv.config();
 
-    if(!user) return res.status(404).json({msg: "User tidak ditemukan"});
-    const match = await argon2.verify(user.password, req.body.password);
-
-    if(!match) return res.status(400).json({msg: "Wrong Password"});
-    req.session.userId = user.uuid;
-    const uuid = user.uuid;
-    const name = user.name;
-    const email = user.email;
-    const role = user.role;
-    res.status(200).json({uuid, name, email, role});
-}
-
-export const Me = async (req, res) =>{
-    if(!req.session.userId){
-        return res.status(400).json({msg: "Mohon login ke akun anda"});
+// Register users
+export const AuthRegister = async (req, res) => {
+    const { name, email, password } = req.body;
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password,salt);
+    try {
+        await Auth.create({
+            name: name,
+            email: email, 
+            password: hashPassword
+        });
+        res.json({msg: "register berhasil"});
+    } catch (error) {
+        res.status(500).json({msg: error.message});
     }
-    const user = await User.findOne({
-        attributes: [
-            'uuid',
-            'name',
-            'email',
-            'role'
-        ],
-        where: {
-            uuid: req.session.userId
-        }
-    });
-
-    if(!user) return res.status(404).json({msg: "User tidak ditemukan"});
-    res.status(200).json(user);
 }
 
-export const logOut = (req, res) => {
-    req.session.destroy((err) =>{
-        if(err) return res.status(400).json({msg: "Tidak dapat logout"});
-        res.status(200).json({msg: "Anda telah logout"});
+// Create Template Email for Register
+export const RegisterNotif = async (req, res) => {
+    const { email, username } = req.body
+    const user = await Auth.findOne({
+        where: {
+            email: email
+        }
     });
+    res.status(200).json(user.email);
+    const templateEmail = {
+        from: 'Developer',
+        to: email,
+        subject: 'Notification for Registration Users',
+        html: `
+        <p>Link : ${process.env.BASE_URL}/${username}/notif/${process.env.ACCESS_TOKEN_SECRET}</p>`
+    }
+    kirimEmail(templateEmail)   
 }

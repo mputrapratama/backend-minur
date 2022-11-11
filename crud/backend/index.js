@@ -1,53 +1,58 @@
 import express from "express";
-import cors from "cors";
-import session from "express-session";
-
-import LoginRoute from "./routes/LoginRoute.js";
-import UserRoute from "./routes/UserRoute.js";
-import ContentRoute from "./routes/ContentRoute.js";
-
-import db from "./config/database.js";
-import SequelizeStore from "connect-session-sequelize";
 import dotenv from "dotenv";
-import AuthRoute from "./routes/AuthRoute.js";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
+import cors from "cors";
+import db from "./config/Database.js";
+import router from "./routes/index.js";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+// import Users from "./models/UserModel.js";
+// import Products from "./models/ProductModel.js";
+// import Customers from "./models/CustomerModel.js";
+// import Auth from "./models/AuthModel.js";
 dotenv.config();
-
 const app = express();
-
-const sessionStore = SequelizeStore(session.Store);
-
-const store = new sessionStore({
-    db:db
-});
-
-// (async()=>{
-//     await db.sync();
-// })();
-
-app.use(session({
-    secret: process.env.SESS_SECRET,
-    resave: false,
-    saveUninitialized:true,
-    store: store,
-    cookie: {
-        secure: 'auto'
+const fileStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'images');
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().getTime() + '-' + file.originalname)
     }
-}));
+})
 
-app.use(cors({
-    credentials: true,
-    origin: 'http://localhost:3000'
-}));
+const filefilter = (req, file, cb) => {
+    if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg' ){
+        cb(null, true);
+    }else {
+        cb(null, false);
+    }
+}
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+
+try {
+    await db.authenticate();
+    console.log('Database Connected...');
+    // await Users.sync();
+    // await Products.sync();
+    // await Customers.sync();
+    // await Auth.sync();
+} catch (error) {
+    console.error(error);
+}
+
+app.use(cors({ credentials:true, origin:'http://localhost:3000' }));
+app.use(cookieParser());
+app.use(multer({storage: fileStorage, fileFilter: filefilter}).single('image'));
+app.use(bodyParser.json());
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.json());
-
-app.use(LoginRoute);
-app.use(UserRoute);
-app.use(ContentRoute);
-app.use(AuthRoute);
-
-// store.sync();
+app.use(router);
 
 
-app.listen(process.env.APP_PORT, ()=> {
-    console.log('Server up and running ...');
-});
+app.listen(5000, ()=> console.log('Server running at port 5000'));

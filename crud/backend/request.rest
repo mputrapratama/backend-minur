@@ -1,53 +1,34 @@
-// create user
-POST http://localhost:5000/user
+
+//Create Users
+POST http://localhost:5000/users
 Content-Type: application/json
 
 {
-    "name": "Arif",
-    "email": "arif@gmail.com",
-    "password" : "123456",
-    "confPassword" : "123456",
-    "role" : "user"
+    "name" : "M Putra Pratama",
+    "email" : "admin@gmail.com",
+    "password" : "123",
+    "confPassword" : "123"
 }
 
 ###
-// get all user
-GET http://localhost:5000/user
+//Get Users
+GET http://localhost:5000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsIm5hbWUiOiJwdXRyYSIsImVtYWlsIjoicHV0cmFAZ21haWwuY29tIiwiaWF0IjoxNjY0MjUzNzQ5LCJleHAiOjE2NjQyNTM3NjR9.zrkIA01H5mQm_We-FQEdb7gJDc_Lq8GbevLygOSVv90
 
 ###
-//get single user
-GET http://localhost:5000/user/249063b9-9ec7-4189-aecd-5732c4cefdf0
-
-###
-//update a user
-PATCH  http://localhost:5000/user/1871c5bd-5ba1-400f-b5a1-e21434ada728
-Content-Type: application/json
-
-{
-    "name": "Renn Tutorial",
-    "email": "admin@gmail.com",
-    "password" : "123456",
-    "confPassword" : "123456",
-    "role" : "admin"
-}
-
-###
-//deleted user
-DELETE http://localhost:5000/user/249063b9-9ec7-4189-aecd-5732c4cefdf0
-
-###
-//Login user
+//Login Users
 POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-    "email": "admin@gmail.com",
-    "password" : "123456"
+    "email" : "putra@gmail.com",
+    "password" : "123"
 }
 
 ###
-GET http://localhost:5000/me
+//Get refresh token
+GET http://localhost:5000/token
 
 ###
-//logout user
+//Logout
 DELETE http://localhost:5000/logout
